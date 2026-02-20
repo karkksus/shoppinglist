@@ -65,26 +65,44 @@ for cat in categories:
 # ============================================================
 #  3. LÄGG TILL VARA (längst ner)
 # ============================================================
+# ============================================================
+# 3. LÄGG TILL / TA BORT VARA (längst ner)
+# ============================================================
 
-st.subheader("➕ Lägg till vara")
+st.subheader("➕ Lägg till eller ta bort vara")
 
 # Kategori först
 category_names = [c["name"] for c in categories]
 category_choice = st.selectbox("Kategori", category_names)
 
-# Vara sen
+# Textfältet
 item_name = st.text_input("Vara")
 
-if st.button("Lägg till"):
-    if item_name.strip():
+if st.button("Lägg till / Ta bort"):
+    name = item_name.strip()
+
+    if name:
+        # Hämta kategori-id
         category_id = next(c["id"] for c in categories if c["name"] == category_choice)
-        supabase.table("items").insert({
-            "name": item_name,
-            "category_id": category_id,
-            "in_shopping_list": False
-        }).execute()
-        st.success(f"'{item_name}' lades till i {category_choice}")
+
+        # Kolla om varan redan finns i kategorin
+        existing = supabase.table("items").select("*").eq("name", name).eq("category_id", category_id).execute().data
+
+        if existing:
+            # ⭐ Ta bort varan
+            supabase.table("items").delete().eq("id", existing[0]["id"]).execute()
+            st.success(f"'{name}' togs bort från {category_choice}")
+        else:
+            # ⭐ Lägg till varan
+            supabase.table("items").insert({
+                "name": name,
+                "category_id": category_id,
+                "in_shopping_list": False
+            }).execute()
+            st.success(f"'{name}' lades till i {category_choice}")
+
         st.rerun()
+
 
 
 
