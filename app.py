@@ -36,6 +36,15 @@ def flytta_tillbaka(vara):
 st.title("🛒 Inköpslista")
 
 # -----------------------------
+# Visa att handla (FLYTTAD HÖGST UPP)
+# -----------------------------
+st.header("Att handla")
+
+for vara in st.session_state.att_handla:
+    if st.checkbox(f"Handlat: {vara}", key=f"handlat-{vara}"):
+        flytta_tillbaka(vara)
+
+# -----------------------------
 # Visa kategorier
 # -----------------------------
 st.header("Kategorier")
@@ -45,13 +54,3 @@ for kategori, varor in st.session_state.kategorier.items():
         for vara in varor:
             if st.checkbox(vara, key=f"{kategori}-{vara}"):
                 flytta_till_handla(vara, kategori)
-
-# -----------------------------
-# Visa att handla
-# -----------------------------
-st.header("Att handla")
-
-for vara in st.session_state.att_handla:
-    if st.checkbox(f"Handlat: {vara}", key=f"handlat-{vara}"):
-        flytta_tillbaka(vara)
-
