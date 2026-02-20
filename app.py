@@ -54,3 +54,4 @@ for kategori, varor in st.session_state.kategorier.items():
         for vara in varor:
             if st.checkbox(vara, key=f"{kategori}-{vara}"):
                 flytta_till_handla(vara, kategori)
+
