@@ -73,8 +73,6 @@ def flytta_tillbaka(vara):
 # -----------------------------------
 st.title("🛒 Inköpslista")
 
-st.title("🛒 Inköpslista")
-
 # -----------------------------
 # Att handla först
 # -----------------------------
