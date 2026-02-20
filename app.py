@@ -13,7 +13,7 @@ if "kategorier" not in st.session_state:
             {"id": str(uuid.uuid4()), "name": "Fil"},
             {"id": str(uuid.uuid4()), "name": "Matlagningsgrädde"},
             {"id": str(uuid.uuid4()), "name": "Smör"},
-            {"id": str(uuid.uuid4()), "name": "Yoghurt"},
+            {"id": str(uuid.uuid4()), "name": "Kefir"},
         ],
         "Frukt & Grönt": [
             {"id": str(uuid.uuid4()), "name": "Äpplen"},
