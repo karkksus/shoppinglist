@@ -78,19 +78,32 @@ st.title("🛒 Inköpslista")
 # -----------------------------
 st.header("Att handla")
 
+att_ta_bort = []
+
 for vara in st.session_state.att_handla:
     if st.checkbox(f"Handlat: {vara}", key=f"handlat-{vara}"):
-        flytta_tillbaka(vara)
+        att_ta_bort.append(vara)
+
+# Uppdatera EFTER loopen
+for vara in att_ta_bort:
+    flytta_tillbaka(vara)
 
 # -----------------------------
 # Kategorier
 # -----------------------------
 st.header("Kategorier")
 
+att_lagga_till = []
+
 for kategori, varor in st.session_state.kategorier.items():
     with st.expander(kategori, expanded=True):
         for vara in varor:
             if st.button(f"Lägg till {vara}", key=f"add-{kategori}-{vara}"):
-                flytta_till_handla(vara, kategori)
+                att_lagga_till.append((vara, kategori))
+
+# Uppdatera EFTER loopen
+for vara, kategori in att_lagga_till:
+    flytta_till_handla(vara, kategori)
+
 
 
