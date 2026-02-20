@@ -72,15 +72,24 @@ for cat in categories:
 
 # ============================================================
 # 3. LÄGG TILL VARA (längst ner)
-# ===========================================================
+# ============================================================
 
 st.subheader("➕ Lägg till vara")
+
+# Initiera flagga
+if "clear_new_item" not in st.session_state:
+    st.session_state.clear_new_item = False
+
+# Om vi ska tömma fältet efter rerun
+if st.session_state.clear_new_item:
+    st.session_state.new_item_name = ""
+    st.session_state.clear_new_item = False
 
 # Kategori först
 category_names = [c["name"] for c in categories]
 category_choice = st.selectbox("Kategori", category_names)
 
-# Vara sen – kopplad till session_state automatiskt
+# Textfältet
 item_name = st.text_input("Vara", key="new_item_name")
 
 if st.button("Lägg till"):
@@ -93,10 +102,11 @@ if st.button("Lägg till"):
             "in_shopping_list": False
         }).execute()
 
-        # ⭐ Töm textfältet
-        st.session_state["new_item_name"] = ""
+        # ⭐ Sätt flagga att tömma fältet efter rerun
+        st.session_state.clear_new_item = True
 
-        st.success(f"'{item_name}' lades till i {category_choice}")
+        st.experimental_rerun()
+
 
         # ⭐ Viktigt: gör en ren omstart av appen
         st.experimental_rerun()
