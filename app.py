@@ -5,8 +5,16 @@ from supabase import create_client, Client
 url = st.secrets["SUPABASE_URL"]
 key = st.secrets["SUPABASE_ANON_KEY"]
 supabase: Client = create_client(url, key)
+items = load_items()
 
-st.title("🛒 Inköpslista")
+# ============================================================
+# 1. INKÖPSLISTA (överst)
+# ============================================================
+
+st.subheader("🛍️ Inköpslista")
+
+shopping_items = [i for i in items if i.get("in_shopping_list")]
+
 # CSS för att hålla knapp + text på samma rad även på mobil
 st.markdown("""
 <style>
@@ -29,24 +37,28 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-for item in shopping_items:
-    # HTML-rad med knapp före text
-    st.markdown(
-        f"""
-        <div class="item-row">
-            <form action="" method="post">
-                <button name="back_{item['id']}" class="return-btn" type="submit">↩️</button>
-            </form>
-            <span class="item-name">{item['name']}</span>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+if not shopping_items:
+    st.write("Inget i inköpslistan just nu.")
+else:
+    for item in shopping_items:
+        st.markdown(
+            f"""
+            <div class="item-row">
+                <form action="" method="post">
+                    <button name="back_{item['id']}" class="return-btn" type="submit">↩️</button>
+                </form>
+                <span class="item-name">{item['name']}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    # Hantera klick
-    if f"back_{item['id']}" in st.session_state:
-        supabase.table("items").update({"in_shopping_list": False}).eq("id", item["id"]).execute()
-        st.rerun()
+        # Hantera klick
+        if f"back_{item['id']}" in st.session_state:
+            supabase.table("items").update({"in_shopping_list": False}).eq("id", item["id"]).execute()
+            st.rerun()
+
+st.markdown("---")
 
 
 # ============================================================
