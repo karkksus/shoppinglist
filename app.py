@@ -5,6 +5,21 @@ from supabase import create_client, Client
 url = st.secrets["SUPABASE_URL"]
 key = st.secrets["SUPABASE_ANON_KEY"]
 supabase: Client = create_client(url, key)
+
+st.title("🛒 Inköpslista")
+
+# --- Load categories ---
+def load_categories():
+    data = supabase.table("categories").select("*").execute()
+    return sorted(data.data, key=lambda x: x["name"])
+
+categories = load_categories()
+
+# --- Load items ---
+def load_items():
+    data = supabase.table("items").select("*").execute()
+    return data.data
+
 items = load_items()
 
 # ============================================================
@@ -15,7 +30,7 @@ st.subheader("🛍️ Inköpslista")
 
 shopping_items = [i for i in items if i.get("in_shopping_list")]
 
-# CSS för att hålla knapp + text på samma rad även på mobil
+# CSS för mobilvänlig rad med knapp före text
 st.markdown("""
 <style>
 .item-row {
@@ -60,11 +75,11 @@ else:
 
 st.markdown("---")
 
-
 # ============================================================
 # 2. KATEGORIER (under inköpslistan)
 # ============================================================
 
+st.subheader("📦 Kategorier")
 
 for cat in categories:
     st.write(f"### {cat['name']}")
@@ -75,7 +90,7 @@ for cat in categories:
         st.write("_Tom kategori_")
     else:
         for item in cat_items:
-            # Klickbar rad: kategori först, sedan vara
+            # Klickbar vara (utan kategori framför)
             if st.button(item["name"], key=f"move_{item['id']}"):
                 supabase.table("items").update({"in_shopping_list": True}).eq("id", item["id"]).execute()
                 st.rerun()
@@ -85,11 +100,14 @@ for cat in categories:
 # ============================================================
 # 3. LÄGG TILL VARA (längst ner)
 # ============================================================
+
 st.subheader("➕ Lägg till vara")
 
+# Kategori först
 category_names = [c["name"] for c in categories]
 category_choice = st.selectbox("Kategori", category_names)
 
+# Vara sen
 item_name = st.text_input("Vara")
 
 if st.button("Lägg till"):
@@ -102,4 +120,3 @@ if st.button("Lägg till"):
         }).execute()
         st.success(f"'{item_name}' lades till i {category_choice}")
         st.rerun()
-
