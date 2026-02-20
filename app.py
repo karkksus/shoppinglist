@@ -27,15 +27,22 @@ items = load_items()
 st.subheader("Lägg till vara")
 
 item_name = st.text_input("Vara")
-category_names = [c["name"] for c in categories]
-category_choice = st.selectbox("Kategori", category_names)
 
-if st.button("Lägg till"):
-    if item_name.strip():
-        category_id = next(c["id"] for c in categories if c["name"] == category_choice)
-        supabase.table("items").insert({"name": item_name, "category_id": category_id}).execute()
-        st.success(f"'{item_name}' lades till i {category_choice}")
-        st.rerun()
+st.write("Välj kategori:")
+
+cols = st.columns(3)
+
+for index, cat in enumerate(categories):
+    col = cols[index % 3]
+    if col.button(cat["name"]):
+        if item_name.strip():
+            supabase.table("items").insert({
+                "name": item_name,
+                "category_id": cat["id"]
+            }).execute()
+            st.success(f"'{item_name}' lades till i {cat['name']}")
+            st.rerun()
+
 
 # --- Show items grouped by category ---
 st.subheader("Varor per kategori")
