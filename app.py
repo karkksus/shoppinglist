@@ -8,22 +8,61 @@ st.set_page_config(page_title="Inköpslista", layout="centered")
 # -----------------------------
 if "kategorier" not in st.session_state:
     st.session_state.kategorier = {
-        "Kylvaror": [
+        "Mejeri": [
             {"id": str(uuid.uuid4()), "name": "Mjölk"},
             {"id": str(uuid.uuid4()), "name": "Fil"},
-            {"id": str(uuid.uuid4()), "name": "Grädde"},
+            {"id": str(uuid.uuid4()), "name": "Matlagningsgrädde"},
+            {"id": str(uuid.uuid4()), "name": "Smör"},
+            {"id": str(uuid.uuid4()), "name": "Yoghurt"},
         ],
         "Frukt & Grönt": [
             {"id": str(uuid.uuid4()), "name": "Äpplen"},
             {"id": str(uuid.uuid4()), "name": "Bananer"},
             {"id": str(uuid.uuid4()), "name": "Tomater"},
+            {"id": str(uuid.uuid4()), "name": "Gurka"},
+            {"id": str(uuid.uuid4()), "name": "Lök"},
         ],
         "Skafferi": [
             {"id": str(uuid.uuid4()), "name": "Pasta"},
             {"id": str(uuid.uuid4()), "name": "Ris"},
             {"id": str(uuid.uuid4()), "name": "Kaffe"},
+            {"id": str(uuid.uuid4()), "name": "Socker"},
+            {"id": str(uuid.uuid4()), "name": "Mjöl"},
+        ],
+        "Kött": [
+            {"id": str(uuid.uuid4()), "name": "Kycklingfilé"},
+            {"id": str(uuid.uuid4()), "name": "Nötfärs"},
+            {"id": str(uuid.uuid4()), "name": "Skinka"},
+            {"id": str(uuid.uuid4()), "name": "Fläskfilé"},
+        ],
+        "Hygien: [
+            {"id": str(uuid.uuid4()), "name": "Schampo"},
+            {"id": str(uuid.uuid4()), "name": "Balsam"},
+            {"id": str(uuid.uuid4()), "name": "Duschtvål"},
+            {"id": str(uuid.uuid4()), "name": "Deo"},
+        ],
+        "Förbrukningsvaror": [
+            {"id": str(uuid.uuid4()), "name": "Toapapper"},
+            {"id": str(uuid.uuid4()), "name": "Diskmedel"},
+            {"id": str(uuid.uuid4()), "name": "Tvättmedel"},
+            {"id": str(uuid.uuid4()), "name": "Soppåsar"},
+        ],
+        "Godis": [
+            {"id": str(uuid.uuid4()), "name": "Geisha"},
+            {"id": str(uuid.uuid4()), "name": "Toffifee"},
+            {"id": str(uuid.uuid4()), "name": "Chips"},
+            {"id": str(uuid.uuid4()), "name": "Ostbågar"},
+        ],
+        "Djur": [
+            {"id": str(uuid.uuid4()), "name": "Blötmat"},
+            {"id": str(uuid.uuid4()), "name": "Torrfoder"},
+            {"id": str(uuid.uuid4()), "name": "Kattgodis"},
+            {"id": str(uuid.uuid4()), "name": "Strö"},
+            {"id": str(uuid.uuid4()), "name": "Hö"},
+            {"id": str(uuid.uuid4()), "name": "Grönsak till marsvin"},
         ],
     }
+
 
 if "att_handla" not in st.session_state:
     st.session_state.att_handla = []
