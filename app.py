@@ -78,17 +78,9 @@ st.title("🛒 Inköpslista")
 # -----------------------------
 st.header("Att handla")
 
-if st.session_state.att_handla:
-    vara_att_ta_bort = st.selectbox(
-        "Markera som handlad:",
-        st.session_state.att_handla,
-        key="select_handlat"
-    )
-
-    if st.button("✔ Markera som handlad"):
-        flytta_tillbaka(vara_att_ta_bort)
-else:
-    st.write("Inget att handla just nu.")
+for vara in st.session_state.att_handla:
+    if st.checkbox(f"Handlat: {vara}", key=f"handlat-{vara}"):
+        flytta_tillbaka(vara)
 
 # -----------------------------
 # Kategorier
@@ -97,18 +89,10 @@ st.header("Kategorier")
 
 for kategori, varor in st.session_state.kategorier.items():
     with st.expander(kategori, expanded=True):
+        for vara in varor:
+            if st.checkbox(vara, key=f"{kategori}-{vara}"):
+                flytta_till_handla(vara, kategori)
 
-        if varor:
-            vara_att_lagga_till = st.selectbox(
-                f"Välj vara från {kategori}:",
-                varor,
-                key=f"select-{kategori}"
-            )
-
-            if st.button(f"➕ Lägg till {vara_att_lagga_till}", key=f"btn-{kategori}"):
-                flytta_till_handla(vara_att_lagga_till, kategori)
-        else:
-            st.write("Inga varor kvar i denna kategori.")
 
 
 
