@@ -20,15 +20,17 @@ if "ursprung" not in st.session_state:
 
 
 def flytta_till_handla(vara, kategori):
-    st.session_state.kategorier[kategori].remove(vara)
-    st.session_state.att_handla.append(vara)
-    st.session_state.ursprung[vara] = kategori
+    if vara not in st.session_state.att_handla:
+        st.session_state.kategorier[kategori].remove(vara)
+        st.session_state.att_handla.append(vara)
+        st.session_state.ursprung[vara] = kategori
 
 
 def flytta_tillbaka(vara):
-    kategori = st.session_state.ursprung.get(vara, "Okänd kategori")
-    st.session_state.att_handla.remove(vara)
-    st.session_state.kategorier[kategori].append(vara)
+    kategori = st.session_state.ursprung.get(vara)
+    if kategori:
+        st.session_state.att_handla.remove(vara)
+        st.session_state.kategorier[kategori].append(vara)
 
 
 st.title("🛒 Inköpslista")
@@ -43,7 +45,6 @@ for kategori, varor in st.session_state.kategorier.items():
         for vara in varor:
             if st.checkbox(vara, key=f"{kategori}-{vara}"):
                 flytta_till_handla(vara, kategori)
-                st.experimental_rerun()
 
 # -----------------------------
 # Visa att handla
@@ -53,4 +54,4 @@ st.header("Att handla")
 for vara in st.session_state.att_handla:
     if st.checkbox(f"Handlat: {vara}", key=f"handlat-{vara}"):
         flytta_tillbaka(vara)
-        st.experimental_rerun()
+
