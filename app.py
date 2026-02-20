@@ -1,47 +1,63 @@
-from streamlit_browser_storage import BrowserStorage
-
-storage = BrowserStorage(key="inkopslista_v1")
-
 import streamlit as st
-from streamlit_browser_storage import BrowserStorage
+import json
 
 st.set_page_config(page_title="Inköpslista", layout="centered")
 
-storage = BrowserStorage(key="inkopslista_v1")
+# -----------------------------------
+# JavaScript för att läsa/skriva localStorage
+# -----------------------------------
+def js_localstorage_get(key):
+    get_js = f"""
+    <script>
+        const value = window.localStorage.getItem("{key}");
+        if (value) {{
+            const pyValue = JSON.parse(value);
+            window.parent.postMessage({{"type": "FROM_JS", "value": pyValue}}, "*");
+        }} else {{
+            window.parent.postMessage({{"type": "FROM_JS", "value": null}}, "*");
+        }}
+    </script>
+    """
+    st.components.v1.html(get_js, height=0)
 
-# -----------------------------
+def js_localstorage_set(key, value):
+    set_js = f"""
+    <script>
+        window.localStorage.setItem("{key}", JSON.stringify({json.dumps(value)}));
+    </script>
+    """
+    st.components.v1.html(set_js, height=0)
+
+# -----------------------------------
 # Ladda sparad data
-# -----------------------------
-saved = storage.get()
+# -----------------------------------
+if "loaded" not in st.session_state:
+    st.session_state.loaded = False
+    st.session_state.kategorier = {
+        "Kylvaror": ["Mjölk", "Fil", "Grädde"],
+        "Frukt & Grönt": ["Äpplen", "Bananer", "Tomater"],
+        "Skafferi": ["Pasta", "Ris", "Kaffe"]
+    }
+    st.session_state.att_handla = []
+    st.session_state.ursprung = {}
 
-if saved:
-    st.session_state.kategorier = saved.get("kategorier", {})
-    st.session_state.att_handla = saved.get("att_handla", [])
-    st.session_state.ursprung = saved.get("ursprung", {})
-else:
-    if "kategorier" not in st.session_state:
-        st.session_state.kategorier = {
-            "Kylvaror": ["Mjölk", "Fil", "Grädde"],
-            "Frukt & Grönt": ["Äpplen", "Bananer", "Tomater"],
-            "Skafferi": ["Pasta", "Ris", "Kaffe"]
-        }
+# Lyssna på data från JS
+msg = st.experimental_get_query_params().get("msg")
+js_localstorage_get("inkopslista_v1")
 
-    if "att_handla" not in st.session_state:
-        st.session_state.att_handla = []
-
-    if "ursprung" not in st.session_state:
-        st.session_state.ursprung = {}
-
-# -----------------------------
-# Funktioner
-# -----------------------------
+# -----------------------------------
+# Funktion för att spara
+# -----------------------------------
 def save_state():
-    storage.set({
+    js_localstorage_set("inkopslista_v1", {
         "kategorier": st.session_state.kategorier,
         "att_handla": st.session_state.att_handla,
         "ursprung": st.session_state.ursprung
     })
 
+# -----------------------------------
+# Funktioner för listlogik
+# -----------------------------------
 def flytta_till_handla(vara, kategori):
     if vara not in st.session_state.att_handla:
         st.session_state.kategorier[kategori].remove(vara)
@@ -56,9 +72,9 @@ def flytta_tillbaka(vara):
         st.session_state.kategorier[kategori].append(vara)
         save_state()
 
-# -----------------------------
+# -----------------------------------
 # UI
-# -----------------------------
+# -----------------------------------
 st.title("🛒 Inköpslista")
 
 # Att handla först
