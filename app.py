@@ -43,12 +43,6 @@ st.markdown("""
     font-weight: bold;
     font-size: 1.1em;
 }
-.return-btn {
-    background: none;
-    border: none;
-    font-size: 1.3em;
-    cursor: pointer;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -56,24 +50,18 @@ if not shopping_items:
     st.write("Inget i inköpslistan just nu.")
 else:
     for item in shopping_items:
-        st.markdown(
-            f"""
-            <div class="item-row">
-                <form action="" method="post">
-                    <button name="back_{item['id']}" class="return-btn" type="submit">↩️</button>
-                </form>
-                <span class="item-name">{item['name']}</span>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        col1, col2 = st.columns([1, 6])
 
-        # Hantera klick
-        if f"back_{item['id']}" in st.session_state:
+        # Knapp före varan
+        if col1.button("↩️", key=f"back_{item['id']}"):
             supabase.table("items").update({"in_shopping_list": False}).eq("id", item["id"]).execute()
             st.rerun()
 
+        # Varans namn
+        col2.markdown(f"<div class='item-name'>{item['name']}</div>", unsafe_allow_html=True)
+
 st.markdown("---")
+
 
 # ============================================================
 # 2. KATEGORIER (under inköpslistan)
