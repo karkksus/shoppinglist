@@ -10,12 +10,7 @@ def js_localstorage_get(key):
     get_js = f"""
     <script>
         const value = window.localStorage.getItem("{key}");
-        if (value) {{
-            const pyValue = JSON.parse(value);
-            window.parent.postMessage({{"type": "FROM_JS", "value": pyValue}}, "*");
-        }} else {{
-            window.parent.postMessage({{"type": "FROM_JS", "value": null}}, "*");
-        }}
+        window.parent.postMessage({{"type": "FROM_JS", "value": value}}, "*");
     </script>
     """
     st.components.v1.html(get_js, height=0)
@@ -29,21 +24,27 @@ def js_localstorage_set(key, value):
     st.components.v1.html(set_js, height=0)
 
 # -----------------------------------
-# Ladda sparad data
+# Initiera standarddata
 # -----------------------------------
-if "loaded" not in st.session_state:
-    st.session_state.loaded = False
+if "kategorier" not in st.session_state:
     st.session_state.kategorier = {
         "Kylvaror": ["Mjölk", "Fil", "Grädde"],
         "Frukt & Grönt": ["Äpplen", "Bananer", "Tomater"],
         "Skafferi": ["Pasta", "Ris", "Kaffe"]
     }
+
+if "att_handla" not in st.session_state:
     st.session_state.att_handla = []
+
+if "ursprung" not in st.session_state:
     st.session_state.ursprung = {}
 
-# Lyssna på data från JS
-msg = st.experimental_get_query_params().get("msg")
+# -----------------------------------
+# Ladda sparad data från localStorage
+# -----------------------------------
 js_localstorage_get("inkopslista_v1")
+
+event = st.experimental_get_query_params().get("event")
 
 # -----------------------------------
 # Funktion för att spara
