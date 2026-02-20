@@ -1,72 +1,39 @@
 import streamlit as st
-import json
 
 st.set_page_config(page_title="Inköpslista", layout="centered")
 
 # -----------------------------------
-# JavaScript för att läsa/skriva localStorage
+# Initiera data
 # -----------------------------------
-def js_localstorage_get(key):
-    js = f"""
-    <script>
-        const value = window.localStorage.getItem("{key}");
-        window.parent.postMessage({{"type": "LOAD_DATA", "value": value}}, "*");
-    </script>
-    """
-    st.components.v1.html(js, height=0)
-
-def js_localstorage_set(key, value):
-    js = f"""
-    <script>
-        window.localStorage.setItem("{key}", JSON.stringify({json.dumps(value)}));
-    </script>
-    """
-    st.components.v1.html(js, height=0)
-
-# -----------------------------------
-# Initiera standarddata
-# -----------------------------------
-if "initialized" not in st.session_state:
-    st.session_state.initialized = True
+if "kategorier" not in st.session_state:
     st.session_state.kategorier = {
         "Kylvaror": ["Mjölk", "Fil", "Grädde"],
         "Frukt & Grönt": ["Äpplen", "Bananer", "Tomater"],
         "Skafferi": ["Pasta", "Ris", "Kaffe"]
     }
+
+if "att_handla" not in st.session_state:
     st.session_state.att_handla = []
+
+if "ursprung" not in st.session_state:
     st.session_state.ursprung = {}
 
 # -----------------------------------
-# Ladda sparad data från localStorage
-# -----------------------------------
-js_localstorage_get("inkopslista_v1")
-
-# -----------------------------------
-# Funktion för att spara
-# -----------------------------------
-def save_state():
-    js_localstorage_set("inkopslista_v1", {
-        "kategorier": st.session_state.kategorier,
-        "att_handla": st.session_state.att_handla,
-        "ursprung": st.session_state.ursprung
-    })
-
-# -----------------------------------
-# Funktioner för listlogik
+# Funktioner
 # -----------------------------------
 def flytta_till_handla(vara, kategori):
     if vara not in st.session_state.att_handla:
         st.session_state.kategorier[kategori].remove(vara)
         st.session_state.att_handla.append(vara)
         st.session_state.ursprung[vara] = kategori
-        save_state()
+        st.experimental_rerun()   # Viktigt för att undvika dubbelklick
 
 def flytta_tillbaka(vara):
     kategori = st.session_state.ursprung.get(vara)
     if kategori:
         st.session_state.att_handla.remove(vara)
         st.session_state.kategorier[kategori].append(vara)
-        save_state()
+        st.experimental_rerun()   # Viktigt för att undvika dubbelklick
 
 # -----------------------------------
 # UI
@@ -92,9 +59,6 @@ for kategori, varor in st.session_state.kategorier.items():
         for vara in varor:
             if st.checkbox(vara, key=f"{kategori}-{vara}"):
                 flytta_till_handla(vara, kategori)
-
-
-
 
 
 
