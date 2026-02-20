@@ -15,9 +15,6 @@ def load_categories():
 
 categories = load_categories()
 
-# Find the "Handla" category
-handla_cat = next((c for c in categories if c["name"].lower() == "handla"), None)
-
 # --- Load items ---
 def load_items():
     data = supabase.table("items").select("*").execute()
@@ -26,40 +23,35 @@ def load_items():
 items = load_items()
 
 # ============================================================
-# 1. HANDLA (överst)
+# 1. INKÖPSLISTA (överst)
 # ============================================================
 
-st.subheader("🛍️ Handla")
+st.subheader("🛍️ Inköpslista")
 
-if handla_cat:
-    handla_items = [i for i in items if i["category_id"] == handla_cat["id"]]
+shopping_items = [i for i in items if i.get("in_shopping_list")]
 
-    if not handla_items:
-        st.write("Inget att handla just nu.")
-    else:
-        for item in handla_items:
-            col1, col2 = st.columns([4, 1])
-            col1.write(f"**{item['name']}**")
-            if col2.button("❌", key=f"del_{item['id']}"):
-                supabase.table("items").delete().eq("id", item["id"]).execute()
-                st.rerun()
+if not shopping_items:
+    st.write("Inget i inköpslistan just nu.")
+else:
+    for item in shopping_items:
+        col1, col2 = st.columns([4, 1])
+        col1.write(f"**{item['name']}**")
+        if col2.button("↩️", key=f"back_{item['id']}"):
+            supabase.table("items").update({"in_shopping_list": False}).eq("id", item["id"]).execute()
+            st.rerun()
 
 st.markdown("---")
 
 # ============================================================
-# 2. KATEGORIER (under Handla)
+# 2. KATEGORIER (under inköpslistan)
 # ============================================================
 
 st.subheader("📦 Kategorier")
 
 for cat in categories:
-    if cat["name"].lower() == "handla":
-        continue  # skip handla here
-
     st.write(f"### {cat['name']}")
 
-    # Items in this category
-    cat_items = [i for i in items if i["category_id"] == cat["id"]]
+    cat_items = [i for i in items if i["category_id"] == cat["id"] and not i.get("in_shopping_list")]
 
     if not cat_items:
         st.write("_Tom kategori_")
@@ -67,8 +59,7 @@ for cat in categories:
         for item in cat_items:
             # Klickbar rad: kategori först, sedan vara
             if st.button(f"{cat['name']} – {item['name']}", key=f"move_{item['id']}"):
-                # Move item to Handla
-                supabase.table("items").update({"category_id": handla_cat["id"]}).eq("id", item["id"]).execute()
+                supabase.table("items").update({"in_shopping_list": True}).eq("id", item["id"]).execute()
                 st.rerun()
 
     st.markdown("---")
@@ -81,12 +72,16 @@ st.subheader("➕ Lägg till vara")
 
 item_name = st.text_input("Vara")
 
-category_names = [c["name"] for c in categories if c["name"].lower() != "handla"]
+category_names = [c["name"] for c in categories]
 category_choice = st.selectbox("Kategori", category_names)
 
 if st.button("Lägg till"):
     if item_name.strip():
         category_id = next(c["id"] for c in categories if c["name"] == category_choice)
-        supabase.table("items").insert({"name": item_name, "category_id": category_id}).execute()
+        supabase.table("items").insert({
+            "name": item_name,
+            "category_id": category_id,
+            "in_shopping_list": False
+        }).execute()
         st.success(f"'{item_name}' lades till i {category_choice}")
         st.rerun()
