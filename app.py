@@ -71,45 +71,29 @@ for cat in categories:
     st.markdown("---")
 
 # ============================================================
-# 3. LÄGG TILL VARA (längst ner)
+#  3. LÄGG TILL VARA (längst ner)
 # ============================================================
 
 st.subheader("➕ Lägg till vara")
-
-# Initiera flagga
-if "clear_new_item" not in st.session_state:
-    st.session_state.clear_new_item = False
-
-# Om vi ska tömma fältet efter rerun
-if st.session_state.clear_new_item:
-    st.session_state.new_item_name = ""
-    st.session_state.clear_new_item = False
 
 # Kategori först
 category_names = [c["name"] for c in categories]
 category_choice = st.selectbox("Kategori", category_names)
 
-# Textfältet
-item_name = st.text_input("Vara", key="new_item_name")
+# Vara sen
+item_name = st.text_input("Vara")
 
 if st.button("Lägg till"):
     if item_name.strip():
         category_id = next(c["id"] for c in categories if c["name"] == category_choice)
-
         supabase.table("items").insert({
             "name": item_name,
             "category_id": category_id,
             "in_shopping_list": False
         }).execute()
+        st.success(f"'{item_name}' lades till i {category_choice}")
+        st.rerun()
 
-        # ⭐ Sätt flagga att tömma fältet efter rerun
-        st.session_state.clear_new_item = True
-
-        st.experimental_rerun()
-
-
-        # ⭐ Viktigt: gör en ren omstart av appen
-        st.experimental_rerun()
 
 
 
