@@ -7,44 +7,39 @@ st.set_page_config(page_title="Inköpslista", layout="centered")
 # JavaScript för att läsa/skriva localStorage
 # -----------------------------------
 def js_localstorage_get(key):
-    get_js = f"""
+    js = f"""
     <script>
         const value = window.localStorage.getItem("{key}");
-        window.parent.postMessage({{"type": "FROM_JS", "value": value}}, "*");
+        window.parent.postMessage({{"type": "LOAD_DATA", "value": value}}, "*");
     </script>
     """
-    st.components.v1.html(get_js, height=0)
+    st.components.v1.html(js, height=0)
 
 def js_localstorage_set(key, value):
-    set_js = f"""
+    js = f"""
     <script>
         window.localStorage.setItem("{key}", JSON.stringify({json.dumps(value)}));
     </script>
     """
-    st.components.v1.html(set_js, height=0)
+    st.components.v1.html(js, height=0)
 
 # -----------------------------------
 # Initiera standarddata
 # -----------------------------------
-if "kategorier" not in st.session_state:
+if "initialized" not in st.session_state:
+    st.session_state.initialized = True
     st.session_state.kategorier = {
         "Kylvaror": ["Mjölk", "Fil", "Grädde"],
         "Frukt & Grönt": ["Äpplen", "Bananer", "Tomater"],
         "Skafferi": ["Pasta", "Ris", "Kaffe"]
     }
-
-if "att_handla" not in st.session_state:
     st.session_state.att_handla = []
-
-if "ursprung" not in st.session_state:
     st.session_state.ursprung = {}
 
 # -----------------------------------
 # Ladda sparad data från localStorage
 # -----------------------------------
 js_localstorage_get("inkopslista_v1")
-
-event = st.experimental_get_query_params().get("event")
 
 # -----------------------------------
 # Funktion för att spara
