@@ -35,7 +35,7 @@ if "kategorier" not in st.session_state:
             {"id": str(uuid.uuid4()), "name": "Skinka"},
             {"id": str(uuid.uuid4()), "name": "Fläskfilé"},
         ],
-        "Hygien: [
+        "Hygien": [
             {"id": str(uuid.uuid4()), "name": "Schampo"},
             {"id": str(uuid.uuid4()), "name": "Balsam"},
             {"id": str(uuid.uuid4()), "name": "Duschtvål"},
