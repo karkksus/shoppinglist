@@ -22,15 +22,11 @@ def load_items():
 
 items = load_items()
 
-# ============================================================
-# 1. INKÖPSLISTA (överst)
-# ============================================================
 
 # ============================================================
 # 1. INKÖPSLISTA (överst)
 # ============================================================
 
-st.subheader("🛍️ Inköpslista")
 
 shopping_items = [i for i in items if i.get("in_shopping_list")]
 
@@ -45,14 +41,10 @@ else:
 
 st.markdown("---")
 
-
-
-
 # ============================================================
 # 2. KATEGORIER (under inköpslistan)
 # ============================================================
 
-st.subheader("📦 Kategorier")
 
 for cat in categories:
     st.write(f"### {cat['name']}")
