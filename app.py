@@ -86,5 +86,6 @@ st.header("Kategorier")
 for kategori, varor in st.session_state.kategorier.items():
     with st.expander(kategori, expanded=True):
         for vara in varor:
-            if st.checkbox(vara, key=f"{kategori}-{vara}"):
+            if st.button(f"Lägg till: {vara}", key=f"btn-{kategori}-{vara}"):
                 flytta_till_handla(vara, kategori)
+
