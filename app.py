@@ -26,8 +26,6 @@ items = load_items()
 # 1. INKÖPSLISTA (överst)
 # ============================================================
 
-st.subheader("🛍️ Inköpslista")
-
 shopping_items = [i for i in items if i.get("in_shopping_list")]
 
 if not shopping_items:
@@ -58,7 +56,7 @@ for cat in categories:
     else:
         for item in cat_items:
             # Klickbar rad: kategori först, sedan vara
-            if st.button(f"{cat['name']} – {item['name']}", key=f"move_{item['id']}"):
+            if st.button(item["name"], key=f"move_{item['id']}"):
                 supabase.table("items").update({"in_shopping_list": True}).eq("id", item["id"]).execute()
                 st.rerun()
 
@@ -67,13 +65,12 @@ for cat in categories:
 # ============================================================
 # 3. LÄGG TILL VARA (längst ner)
 # ============================================================
-
 st.subheader("➕ Lägg till vara")
-
-item_name = st.text_input("Vara")
 
 category_names = [c["name"] for c in categories]
 category_choice = st.selectbox("Kategori", category_names)
+
+item_name = st.text_input("Vara")
 
 if st.button("Lägg till"):
     if item_name.strip():
@@ -85,3 +82,4 @@ if st.button("Lägg till"):
         }).execute()
         st.success(f"'{item_name}' lades till i {category_choice}")
         st.rerun()
+
