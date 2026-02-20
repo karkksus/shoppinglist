@@ -1,116 +1,53 @@
 import streamlit as st
-import uuid
+from supabase import create_client, Client
 
-st.set_page_config(page_title="Inköpslista", layout="centered")
+# --- Supabase connection ---
+url = st.secrets["SUPABASE_URL"]
+key = st.secrets["SUPABASE_ANON_KEY"]
+supabase: Client = create_client(url, key)
 
-# -----------------------------
-# Initiera data
-# -----------------------------
-if "kategorier" not in st.session_state:
-    st.session_state.kategorier = {
-        "Mejeri": [
-            {"id": str(uuid.uuid4()), "name": "Mjölk"},
-            {"id": str(uuid.uuid4()), "name": "Fil"},
-            {"id": str(uuid.uuid4()), "name": "Matlagningsgrädde"},
-            {"id": str(uuid.uuid4()), "name": "Smör"},
-            {"id": str(uuid.uuid4()), "name": "Kefir"},
-        ],
-        "Frukt & Grönt": [
-            {"id": str(uuid.uuid4()), "name": "Äpplen"},
-            {"id": str(uuid.uuid4()), "name": "Bananer"},
-            {"id": str(uuid.uuid4()), "name": "Tomater"},
-            {"id": str(uuid.uuid4()), "name": "Gurka"},
-            {"id": str(uuid.uuid4()), "name": "Lök"},
-        ],
-        "Skafferi": [
-            {"id": str(uuid.uuid4()), "name": "Pasta"},
-            {"id": str(uuid.uuid4()), "name": "Ris"},
-            {"id": str(uuid.uuid4()), "name": "Kaffe"},
-            {"id": str(uuid.uuid4()), "name": "Socker"},
-            {"id": str(uuid.uuid4()), "name": "Mjöl"},
-        ],
-        "Kött": [
-            {"id": str(uuid.uuid4()), "name": "Kycklingfilé"},
-            {"id": str(uuid.uuid4()), "name": "Nötfärs"},
-            {"id": str(uuid.uuid4()), "name": "Skinka"},
-            {"id": str(uuid.uuid4()), "name": "Fläskfilé"},
-        ],
-        "Hygien": [
-            {"id": str(uuid.uuid4()), "name": "Schampo"},
-            {"id": str(uuid.uuid4()), "name": "Balsam"},
-            {"id": str(uuid.uuid4()), "name": "Duschtvål"},
-            {"id": str(uuid.uuid4()), "name": "Deo"},
-        ],
-        "Förbrukningsvaror": [
-            {"id": str(uuid.uuid4()), "name": "Toapapper"},
-            {"id": str(uuid.uuid4()), "name": "Diskmedel"},
-            {"id": str(uuid.uuid4()), "name": "Tvättmedel"},
-            {"id": str(uuid.uuid4()), "name": "Soppåsar"},
-        ],
-        "Godis": [
-            {"id": str(uuid.uuid4()), "name": "Geisha"},
-            {"id": str(uuid.uuid4()), "name": "Toffifee"},
-            {"id": str(uuid.uuid4()), "name": "Chips"},
-            {"id": str(uuid.uuid4()), "name": "Ostbågar"},
-        ],
-        "Djur": [
-            {"id": str(uuid.uuid4()), "name": "Blötmat"},
-            {"id": str(uuid.uuid4()), "name": "Torrfoder"},
-            {"id": str(uuid.uuid4()), "name": "Kattgodis"},
-            {"id": str(uuid.uuid4()), "name": "Strö"},
-            {"id": str(uuid.uuid4()), "name": "Hö"},
-            {"id": str(uuid.uuid4()), "name": "Grönsak till marsvin"},
-        ],
-    }
-
-
-if "att_handla" not in st.session_state:
-    st.session_state.att_handla = []
-
-if "ursprung" not in st.session_state:
-    st.session_state.ursprung = {}
-
-
-# -----------------------------
-# Funktioner
-# -----------------------------
-def flytta_till_handla(item, kategori):
-    st.session_state.kategorier[kategori] = [
-        v for v in st.session_state.kategorier[kategori] if v["id"] != item["id"]
-    ]
-    st.session_state.att_handla.append(item)
-    st.session_state.ursprung[item["id"]] = kategori
-
-
-def flytta_tillbaka(item):
-    kategori = st.session_state.ursprung.get(item["id"])
-    st.session_state.att_handla = [
-        v for v in st.session_state.att_handla if v["id"] != item["id"]
-    ]
-    st.session_state.kategorier[kategori].append(item)
-
-
-# -----------------------------
-# UI
-# -----------------------------
 st.title("🛒 Inköpslista")
 
-# -----------------------------
-# Att handla först
-# -----------------------------
-st.header("Att handla")
+# --- Load categories from database ---
+@st.cache_data
+def load_categories():
+    data = supabase.table("categories").select("*").execute()
+    return sorted(data.data, key=lambda x: x["name"])
 
-for item in st.session_state.att_handla:
-    if st.checkbox(f" {item['name']}", key=f"done-{item['id']}"):
-        flytta_tillbaka(item)
+categories = load_categories()
 
-# -----------------------------
-# Kategorier
-# -----------------------------
-st.header("Kategorier")
+# --- Load items ---
+def load_items():
+    data = supabase.table("items").select("id, name, category_id").execute()
+    return data.data
 
-for kategori, varor in st.session_state.kategorier.items():
-    with st.expander(kategori, expanded=True):
-        for item in varor:
-            if st.checkbox(item["name"], key=item["id"]):
-                flytta_till_handla(item, kategori)
+items = load_items()
+
+# --- Add new item ---
+st.subheader("Lägg till vara")
+
+item_name = st.text_input("Vara")
+category_names = [c["name"] for c in categories]
+category_choice = st.selectbox("Kategori", category_names)
+
+if st.button("Lägg till"):
+    if item_name.strip():
+        category_id = next(c["id"] for c in categories if c["name"] == category_choice)
+        supabase.table("items").insert({"name": item_name, "category_id": category_id}).execute()
+        st.success(f"'{item_name}' lades till i {category_choice}")
+        st.rerun()
+
+# --- Show items grouped by category ---
+st.subheader("Varor per kategori")
+
+for cat in categories:
+    cat_items = [i for i in items if i["category_id"] == cat["id"]]
+
+    if cat_items:
+        with st.expander(cat["name"]):
+            for item in cat_items:
+                col1, col2 = st.columns([4, 1])
+                col1.write(item["name"])
+                if col2.button("❌", key=item["id"]):
+                    supabase.table("items").delete().eq("id", item["id"]).execute()
+                    st.rerun()
