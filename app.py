@@ -76,11 +76,15 @@ for cat in categories:
 
 st.subheader("➕ Lägg till vara")
 
+# Initiera session_state om den inte finns
+if "new_item_name" not in st.session_state:
+    st.session_state.new_item_name = ""
+
 # Kategori först
 category_names = [c["name"] for c in categories]
 category_choice = st.selectbox("Kategori", category_names)
 
-# Vara sen – lagras i session_state så vi kan tömma det
+# Vara sen – kopplad till session_state
 item_name = st.text_input("Vara", key="new_item_name")
 
 if st.button("Lägg till"):
@@ -93,9 +97,10 @@ if st.button("Lägg till"):
             "in_shopping_list": False
         }).execute()
 
-        # ⭐ Töm textfältet direkt efter att varan lagts till
+        # ⭐ Töm textfältet
         st.session_state.new_item_name = ""
 
         st.success(f"'{item_name}' lades till i {category_choice}")
         st.rerun()
+
 
