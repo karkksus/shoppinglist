@@ -80,16 +80,22 @@ st.subheader("➕ Lägg till vara")
 category_names = [c["name"] for c in categories]
 category_choice = st.selectbox("Kategori", category_names)
 
-# Vara sen
-item_name = st.text_input("Vara")
+# Vara sen – lagras i session_state så vi kan tömma det
+item_name = st.text_input("Vara", key="new_item_name")
 
 if st.button("Lägg till"):
-    if item_name.strip():
+    if st.session_state.new_item_name.strip():
         category_id = next(c["id"] for c in categories if c["name"] == category_choice)
+
         supabase.table("items").insert({
-            "name": item_name,
+            "name": st.session_state.new_item_name,
             "category_id": category_id,
             "in_shopping_list": False
         }).execute()
+
+        # ⭐ Töm textfältet direkt efter att varan lagts till
+        st.session_state.new_item_name = ""
+
         st.success(f"'{item_name}' lades till i {category_choice}")
         st.rerun()
+
