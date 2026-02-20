@@ -30,22 +30,12 @@ st.subheader("🛍️ Inköpslista")
 
 shopping_items = [i for i in items if i.get("in_shopping_list")]
 
-# CSS som håller knapp + text på samma rad även på mobil
+# CSS för att minska marginaler så att kolumnerna håller ihop även på mobil
 st.markdown("""
 <style>
-.item-row {
+div[data-testid="column"] {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 8px 0;
-}
-.item-name {
-    font-weight: bold;
-    font-size: 1.1em;
-}
-.return-btn {
-    padding: 4px 8px;
-    font-size: 1.2em;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -54,21 +44,18 @@ if not shopping_items:
     st.write("Inget i inköpslistan just nu.")
 else:
     for item in shopping_items:
-
-        # Gör en rad med HTML + Streamlit-knapp
-        st.markdown(f"<div class='item-row'>", unsafe_allow_html=True)
+        col1, col2 = st.columns([1, 8])   # 1 = knapp, 8 = text
 
         # Knapp före varan
-        if st.button("↩️", key=f"back_{item['id']}", help="Flytta tillbaka"):
+        if col1.button("↩️", key=f"back_{item['id']}"):
             supabase.table("items").update({"in_shopping_list": False}).eq("id", item["id"]).execute()
             st.rerun()
 
         # Varans namn
-        st.markdown(f"<span class='item-name'>{item['name']}</span>", unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
+        col2.write(f"**{item['name']}**")
 
 st.markdown("---")
+
 
 # ============================================================
 # 2. KATEGORIER (under inköpslistan)
