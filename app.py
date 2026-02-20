@@ -72,35 +72,34 @@ for cat in categories:
 
 # ============================================================
 # 3. LÄGG TILL VARA (längst ner)
-# ============================================================
+# ===========================================================
 
 st.subheader("➕ Lägg till vara")
-
-# Initiera session_state om den inte finns
-if "new_item_name" not in st.session_state:
-    st.session_state.new_item_name = ""
 
 # Kategori först
 category_names = [c["name"] for c in categories]
 category_choice = st.selectbox("Kategori", category_names)
 
-# Vara sen – kopplad till session_state
+# Vara sen – kopplad till session_state automatiskt
 item_name = st.text_input("Vara", key="new_item_name")
 
 if st.button("Lägg till"):
-    if st.session_state.new_item_name.strip():
+    if item_name.strip():
         category_id = next(c["id"] for c in categories if c["name"] == category_choice)
 
         supabase.table("items").insert({
-            "name": st.session_state.new_item_name,
+            "name": item_name,
             "category_id": category_id,
             "in_shopping_list": False
         }).execute()
 
         # ⭐ Töm textfältet
-        st.session_state.new_item_name = ""
+        st.session_state["new_item_name"] = ""
 
         st.success(f"'{item_name}' lades till i {category_choice}")
-        st.rerun()
+
+        # ⭐ Viktigt: gör en ren omstart av appen
+        st.experimental_rerun()
+
 
 
