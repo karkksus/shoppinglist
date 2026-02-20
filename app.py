@@ -2,9 +2,9 @@ import streamlit as st
 
 st.set_page_config(page_title="Inköpslista", layout="centered")
 
-# -----------------------------------
-# Initiera data
-# -----------------------------------
+# -----------------------------
+# Data
+# -----------------------------
 if "kategorier" not in st.session_state:
     st.session_state.kategorier = {
         "Kylvaror": ["Mjölk", "Fil", "Grädde"],
@@ -18,26 +18,21 @@ if "att_handla" not in st.session_state:
 if "ursprung" not in st.session_state:
     st.session_state.ursprung = {}
 
-# -----------------------------------
-# Funktioner
-# -----------------------------------
+
 def flytta_till_handla(vara, kategori):
     if vara not in st.session_state.att_handla:
         st.session_state.kategorier[kategori].remove(vara)
         st.session_state.att_handla.append(vara)
         st.session_state.ursprung[vara] = kategori
-        st.experimental_rerun()   # Viktigt för att undvika dubbelklick
+
 
 def flytta_tillbaka(vara):
     kategori = st.session_state.ursprung.get(vara)
     if kategori:
         st.session_state.att_handla.remove(vara)
         st.session_state.kategorier[kategori].append(vara)
-        st.experimental_rerun()   # Viktigt för att undvika dubbelklick
 
-# -----------------------------------
-# UI
-# -----------------------------------
+
 st.title("🛒 Inköpslista")
 
 # -----------------------------
@@ -59,6 +54,3 @@ for kategori, varor in st.session_state.kategorier.items():
         for vara in varor:
             if st.checkbox(vara, key=f"{kategori}-{vara}"):
                 flytta_till_handla(vara, kategori)
-
-
-
