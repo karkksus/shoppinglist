@@ -73,19 +73,26 @@ def flytta_tillbaka(vara):
 # -----------------------------------
 st.title("🛒 Inköpslista")
 
+st.title("🛒 Inköpslista")
+
+# -----------------------------
 # Att handla först
+# -----------------------------
 st.header("Att handla")
 
 for vara in st.session_state.att_handla:
     if st.checkbox(f"Handlat: {vara}", key=f"handlat-{vara}"):
         flytta_tillbaka(vara)
 
+# -----------------------------
 # Kategorier
+# -----------------------------
 st.header("Kategorier")
 
 for kategori, varor in st.session_state.kategorier.items():
     with st.expander(kategori, expanded=True):
         for vara in varor:
-            if st.button(f"Lägg till: {vara}", key=f"btn-{kategori}-{vara}"):
+            if st.button(f"Lägg till {vara}", key=f"add-{kategori}-{vara}"):
                 flytta_till_handla(vara, kategori)
+
 
