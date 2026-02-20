@@ -101,7 +101,7 @@ st.title("🛒 Inköpslista")
 st.header("Att handla")
 
 for item in st.session_state.att_handla:
-    if st.checkbox(f"Handlat: {item['name']}", key=f"done-{item['id']}"):
+    if st.checkbox(f" {item['name']}", key=f"done-{item['id']}"):
         flytta_tillbaka(item)
 
 # -----------------------------
