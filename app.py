@@ -25,43 +25,58 @@ def load_items():
 
 items = load_items()
 
-# --- HANDLA (always shown first) ---
+# ============================================================
+# 1. HANDLA (överst)
+# ============================================================
+
 st.subheader("🛍️ Handla")
 
 if handla_cat:
     handla_items = [i for i in items if i["category_id"] == handla_cat["id"]]
-    for item in handla_items:
-        col1, col2 = st.columns([4, 1])
-        col1.write(item["name"])
-        if col2.button("❌", key=item["id"]):
-            supabase.table("items").delete().eq("id", item["id"]).execute()
-            st.rerun()
+
+    if not handla_items:
+        st.write("Inget att handla just nu.")
+    else:
+        for item in handla_items:
+            col1, col2 = st.columns([4, 1])
+            col1.write(f"**{item['name']}**")
+            if col2.button("❌", key=f"del_{item['id']}"):
+                supabase.table("items").delete().eq("id", item["id"]).execute()
+                st.rerun()
 
 st.markdown("---")
 
-# --- OTHER CATEGORIES ---
+# ============================================================
+# 2. KATEGORIER (under Handla)
+# ============================================================
+
 st.subheader("📦 Kategorier")
 
 for cat in categories:
     if cat["name"].lower() == "handla":
         continue  # skip handla here
 
-    st.write(f"**{cat['name']}**")
+    st.write(f"### {cat['name']}")
 
-    # Small clickable square to move item to Handla
-    if st.button("⬜ Flytta till Handla", key=f"move_{cat['id']}"):
-        # Move ALL items in this category to Handla
-        supabase.table("items").update({"category_id": handla_cat["id"]}).eq("category_id", cat["id"]).execute()
-        st.rerun()
-
-    # Show items in this category
+    # Items in this category
     cat_items = [i for i in items if i["category_id"] == cat["id"]]
-    for item in cat_items:
-        st.write(f"- {item['name']}")
+
+    if not cat_items:
+        st.write("_Tom kategori_")
+    else:
+        for item in cat_items:
+            # Klickbar rad: kategori först, sedan vara
+            if st.button(f"{cat['name']} – {item['name']}", key=f"move_{item['id']}"):
+                # Move item to Handla
+                supabase.table("items").update({"category_id": handla_cat["id"]}).eq("id", item["id"]).execute()
+                st.rerun()
 
     st.markdown("---")
 
-# --- ADD NEW ITEM ---
+# ============================================================
+# 3. LÄGG TILL VARA (längst ner)
+# ============================================================
+
 st.subheader("➕ Lägg till vara")
 
 item_name = st.text_input("Vara")
