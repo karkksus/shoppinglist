@@ -1,6 +1,9 @@
 import streamlit as st
 import uuid
 
+st.session_state.clear()
+
+
 st.set_page_config(page_title="Inköpslista", layout="centered")
 
 # -----------------------------
